@@ -38,6 +38,7 @@ class Worker:
         # For now, just simulate some processing time
         time.sleep(2)
         print("Task completed")
+        self.connect_to_scheduler()
 
 if __name__ == "__main__":
     # Replace these with the worker's IP and port and scheduler's IP and port
