@@ -46,6 +46,6 @@ if __name__ == "__main__":
     scheduler_host = "192.168.1.15"  # Scheduler IP address
     scheduler_port = 65432            # Scheduler port
 
-    worker = Worker(worker_host, worker_port, scheduler_host, scheduler_port)
+    worker = Worker(worker_host, worker_port, SchedulerInfo(scheduler_host, scheduler_port))
     worker.connect_to_scheduler()
     worker.listen_for_tasks()
