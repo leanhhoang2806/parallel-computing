@@ -55,7 +55,7 @@ class Scheduler:
             return True
         return False
 
-    def _send_task(self, worker: WorkerInfo, task):
+    def _send_task(self, worker: WorkerInfo, task: Task):
         """Open a Connection to worker and send task over"""
         serialized_task = pickle.dumps(task)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -68,7 +68,13 @@ class Scheduler:
         try:
             connection, address = server_socket.accept()
             print(f"Connected to worker at {address}")
-            self.ready_workers.put(connection)
+            data = connection.recv(1024)  # Adjust buffer size as needed
+            worker_info = pickle.loads(data)
+            print(f"Received worker info: {worker_info.host}:{worker_info.port}")
+
+            # Add deserialized worker info to the ready_workers queue
+            self.ready_workers.put(worker_info)
+            print(f"Worker registered: {worker_info.host}:{worker_info.port}")
         except BlockingIOError:
             pass
 
