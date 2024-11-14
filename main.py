@@ -5,7 +5,9 @@ import time
 import os
 
 # Matrix sizes (you can adjust this as needed)
-matrix_size = 5000*2
+matrix_size = 7000
+cpu_failed = matrix_size * 10
+gpu_out_of_memory = matrix_size * 10
 
 # Generate random matrices
 A = torch.randn(matrix_size, matrix_size)
@@ -52,33 +54,3 @@ if torch.cuda.is_available():
 else:
     print("No GPU available.")
 
-# 4. Distributed Training Benchmark
-def init_process(rank, world_size, backend="nccl"):
-    os.environ['MASTER_ADDR'] = '127.0.0.1'
-    os.environ['MASTER_PORT'] = '29500'
-    dist.init_process_group(backend, rank=rank, world_size=world_size)
-
-    # Move A and B to the specific GPU for this rank
-    device = torch.device(f"cuda:{rank}")
-    A_device = A.to(device)
-    B_device = B.to(device)
-
-    # Start timer
-    start_time = time.time()
-    
-    # Perform matrix multiplication in parallel
-    C = torch.mm(A_device, B_device)
-    
-    # Synchronize all processes
-    dist.barrier()
-    
-    # End timer
-    end_time = time.time()
-    if rank == 0:
-        print(f"Time on distributed setup with {world_size} GPUs: {end_time - start_time:.3f} seconds")
-
-    dist.destroy_process_group()
-
-if torch.cuda.device_count() > 1:
-    world_size = torch.cuda.device_count()
-    mp.spawn(init_process, args=(world_size,), nprocs=world_size)

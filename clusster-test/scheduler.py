@@ -3,14 +3,8 @@ import threading
 import pickle
 import queue
 import time
-from pydantic import BaseModel
+from models import InternalParameters, WorkerInfo
 
-class InternalParameters(BaseModel):
-    wait_time: int
-
-class WorkerInfo(BaseModel):
-    host: str
-    port: int
 
 class Scheduler:
     def __init__(self, host, port):
@@ -77,6 +71,6 @@ class Scheduler:
             self._send_task(current_worker, current_task)
 
 if __name__ == "__main__":
-    scheduler = Scheduler("localhost", 65432)
-    
+    scheduler = Scheduler("0.0.0.0", 65432)
+    scheduler.run()
             
