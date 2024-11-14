@@ -3,7 +3,10 @@ import threading
 import pickle
 import queue
 import time
-from models import InternalParameters, WorkerInfo
+from models import InternalParameters, WorkerInfo, Task
+from fastapi import FastAPI
+from typing import Any
+import uvicorn
 
 
 class Scheduler:
@@ -17,6 +20,20 @@ class Scheduler:
         self.internal_parameters = InternalParameters(
             wait_time=5
         )
+        self.app = FastAPI()
+        self._setup_routes()
+
+    def _setup_routes(self):
+        @self.app.post("/add_task/")
+        async def add_task(task: Task):
+            """Endpoint to add a new task to the queue."""
+            self.tasks_queue.put(task)
+            return {"message": "Task added successfully", "task": task}
+
+    def run_https_server(self):
+        """Run HTTPS server with FastAPI on a separate thread."""
+        # Replace "cert.pem" and "key.pem" with your actual certificate and key files
+        uvicorn.run(self.app)
 
     def add_task(self, task):
         self.tasks_queue.put(task)
@@ -56,21 +73,22 @@ class Scheduler:
             pass
 
     def run(self):
-        print("Running the worker")
+        print("Running the Scheduler")
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((self.host, self.port))
         server_socket.listen(5)
-        server_socket.setblocking(False) 
         print("Scheduler is running and ready for connections.")
         while True:
             self._worker_connection_skip(server_socket)
-            if not self._sleep_if_worker_not_available(): continue
-            if not self._sleep_if_no_task_to_process(): continue
             current_worker = self.ready_workers.get()
+            print(f"current worker = {current_worker}")
             current_task = self.tasks_queue.get()
             self._send_task(current_worker, current_task)
+            time.sleep(10)
 
 if __name__ == "__main__":
     scheduler = Scheduler("0.0.0.0", 65432)
+
+    threading.Thread(target=scheduler.run_https_server, daemon=True).start()
     scheduler.run()
             

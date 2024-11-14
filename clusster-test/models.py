@@ -11,3 +11,8 @@ class WorkerInfo(BaseModel):
 class SchedulerInfo(BaseModel):
     host: str
     port: int
+
+
+class Task(BaseModel):
+    task_id: int
+    description: str

@@ -41,7 +41,7 @@ class Worker:
 
 if __name__ == "__main__":
     # Replace these with the worker's IP and port and scheduler's IP and port
-    worker_host = "0.0.0.0"  # Worker IP address
+    worker_host = "192.168.1.25"  # Worker IP address
     worker_port = 65433       # Worker port (unique for each worker)
     scheduler_host = "192.168.1.15"  # Scheduler IP address
     scheduler_port = 65432            # Scheduler port
